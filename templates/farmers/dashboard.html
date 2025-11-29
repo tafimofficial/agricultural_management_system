@@ -1,0 +1,746 @@
+{% extends 'base.html' %}
+
+{% block title %}Farmer Dashboard{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50">
+    <!-- Animated Header -->
+    <div class="bg-white/80 backdrop-blur-lg shadow-sm border-b border-green-100/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <div class="transform transition-all duration-300 hover:scale-105">
+                    <h1 class="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">Farmer Dashboard</h1>
+                    <p class="text-green-600/80 mt-2 animate-pulse">🌱 Manage your farm operations in one place</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="bg-green-500/10 px-4 py-2 rounded-full border border-green-200/50">
+                        <span class="text-green-700 font-medium">Welcome back! 👋</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" x-data="farmerDashboard()">
+        <!-- Floating Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 transform transition-all duration-500">
+            <!-- Active Listings -->
+            <div class="bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg border border-green-100/50 p-6 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 group">
+                <div class="flex items-center">
+                    <div class="p-4 bg-gradient-to-br from-green-100 to-emerald-100 rounded-2xl mr-4 group-hover:scale-110 transition-transform duration-300">
+                        <span class="text-3xl animate-bounce">🌾</span>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-green-600/80">Active Listings</p>
+                        <p class="text-3xl font-bold text-green-900 mt-2" x-text="listings.length">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Revenue -->
+            <div class="bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg border border-green-100/50 p-6 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 group">
+                <div class="flex items-center">
+                    <div class="p-4 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-2xl mr-4 group-hover:scale-110 transition-transform duration-300">
+                        <span class="text-3xl animate-pulse">💰</span>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-emerald-600/80">Total Revenue</p>
+                        <p class="text-3xl font-bold text-emerald-900 mt-2">৳<span x-text="totalRevenue">0</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Questions Asked -->
+            <div class="bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg border border-green-100/50 p-6 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 group">
+                <div class="flex items-center">
+                    <div class="p-4 bg-gradient-to-br from-teal-100 to-cyan-100 rounded-2xl mr-4 group-hover:scale-110 transition-transform duration-300">
+                        <span class="text-3xl animate-ping">❓</span>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-teal-600/80">Questions Asked</p>
+                        <p class="text-3xl font-bold text-teal-900 mt-2" x-text="questionsCount">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Orders -->
+            <div class="bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg border border-green-100/50 p-6 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 group">
+                <div class="flex items-center">
+                    <div class="p-4 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl mr-4 group-hover:scale-110 transition-transform duration-300">
+                        <span class="text-3xl animate-bounce">📦</span>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-amber-600/80">Active Orders</p>
+                        <p class="text-3xl font-bold text-amber-900 mt-2" x-text="orders.length">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 transform transition-all duration-500">
+            <!-- Left Column -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- Recent Listings -->
+                <div class="bg-white/80 backdrop-blur-lg rounded-3xl shadow-lg border border-green-100/50 overflow-hidden transform transition-all duration-300 hover:shadow-xl">
+                    <div class="px-8 py-6 border-b border-green-100/50 bg-gradient-to-r from-green-50 to-emerald-50/50">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                            <h2 class="text-xl font-bold text-green-900 flex items-center">
+                                <span class="mr-3 text-2xl animate-bounce">📋</span>Recent Listings
+                            </h2>
+                            <div class="flex space-x-3 mt-4 sm:mt-0">
+                                <a href="/farmers/listings/" class="bg-white/80 text-green-700 px-4 py-2 rounded-xl hover:bg-green-50 transition-all duration-300 border border-green-200/50 font-medium shadow-sm hover:shadow-md">
+                                    View All
+                                </a>
+                                <a href="/farmers/listings/create/" class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-5 py-2.5 rounded-xl hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 font-medium shadow-lg flex items-center">
+                                    <span class="mr-2">+</span> Add New
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" x-show="listings.length > 0">
+                            <template x-for="listing in listings.slice(0, 4)" :key="listing.id">
+                                <div class="border border-green-200/50 rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500 bg-white/60 backdrop-blur-sm transform hover:-translate-y-1 group">
+                                    <div class="h-32 bg-gradient-to-r from-green-100 to-emerald-100 relative overflow-hidden">
+                                        <template x-if="listing.image">
+                                            <img :src="listing.image" :alt="listing.title" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                                        </template>
+                                        <template x-if="!listing.image">
+                                            <div class="flex items-center justify-center h-full text-4xl text-green-400 animate-pulse">🌾</div>
+                                        </template>
+                                        <div class="absolute top-3 right-3 bg-green-500 text-white text-xs px-3 py-1.5 rounded-full font-bold shadow-lg">
+                                            Active
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="p-5 flex-1 flex flex-col justify-between">
+                                        <div>
+                                            <h3 class="font-bold text-green-900 text-base mb-2 line-clamp-1" x-text="listing.title"></h3>
+                                            <p class="text-green-700/80 text-sm mb-3 line-clamp-2" x-text="listing.description"></p>
+                                        </div>
+                                        <div class="flex justify-between items-center pt-4 border-t border-green-100/50">
+                                            <p class="font-bold text-green-600 text-lg">৳<span x-text="listing.price"></span>/kg</p>
+                                            <div class="flex space-x-3 text-sm">
+                                                <a :href="`/farmers/listings/${listing.id}/edit/`" class="text-blue-600 hover:text-blue-800 font-medium hover:scale-110 transition-transform duration-300">Edit</a>
+                                                <a :href="`/farmers/listings/${listing.id}/delete/`" class="text-red-600 hover:text-red-800 font-medium hover:scale-110 transition-transform duration-300">Delete</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                        
+                        <div x-show="listings.length === 0" class="text-center py-12">
+                            <div class="text-6xl mb-6 text-green-300 animate-bounce">📦</div>
+                            <p class="text-green-600/70 mb-4 text-lg">No listings yet</p>
+                            <a href="/farmers/listings/create/" class="inline-flex items-center bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 font-medium shadow-lg">
+                                Create your first listing 
+                                <span class="ml-2 animate-pulse">→</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Management -->
+                <div class="bg-white/80 backdrop-blur-lg rounded-3xl shadow-lg border border-green-100/50 overflow-hidden transform transition-all duration-300 hover:shadow-xl">
+                    <div class="px-8 py-6 border-b border-green-100/50 bg-gradient-to-r from-blue-50 to-cyan-50/50">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                            <h2 class="text-xl font-bold text-blue-900 flex items-center">
+                                <span class="mr-3 text-2xl animate-pulse">🚚</span>Order Management
+                            </h2>
+                            <span class="bg-gradient-to-r from-blue-500 to-cyan-600 text-white text-sm px-4 py-2 rounded-full font-bold shadow-lg mt-3 sm:mt-0 transform hover:scale-105 transition-transform duration-300" 
+                                  x-text="orders.length + ' Orders'"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="p-6">
+                        <div x-show="orders.length > 0" class="space-y-6 max-h-96 overflow-y-auto custom-scrollbar">
+                            <template x-for="order in orders" :key="order.id">
+                                <div class="border border-blue-200/50 rounded-2xl p-6 hover:shadow-xl transition-all duration-500 bg-white/60 backdrop-blur-sm transform hover:-translate-y-1 group">
+                                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4">
+                                        <div class="flex-1">
+                                            <h3 class="font-bold text-blue-900 text-lg">Order #<span x-text="order.id"></span></h3>
+                                            <p class="text-blue-700/80 text-sm mt-2">👤 Buyer: <span x-text="order.buyer_name" class="font-medium"></span></p>
+                                            <p class="text-blue-500/60 text-xs mt-1" x-text="new Date(order.created_at).toLocaleDateString()"></p>
+                                        </div>
+                                        <span :class="{
+                                            'bg-gradient-to-r from-yellow-400 to-amber-500 text-white': order.status === 'pending',
+                                            'bg-gradient-to-r from-green-400 to-emerald-500 text-white': order.status === 'confirmed' || order.status === 'delivered',
+                                            'bg-gradient-to-r from-red-400 to-pink-500 text-white': order.status === 'cancelled',
+                                            'bg-gradient-to-r from-blue-400 to-cyan-500 text-white': order.status === 'shipped'
+                                        }" class="text-xs px-4 py-2 rounded-full font-bold uppercase mt-3 sm:mt-0 self-start shadow-lg transform group-hover:scale-105 transition-transform duration-300" 
+                                        x-text="order.status"></span>
+                                    </div>
+                                    
+                                    <div class="bg-gradient-to-r from-blue-50 to-cyan-50/50 p-4 rounded-xl mb-4 text-sm border border-blue-100/50">
+                                        <p class="font-bold mb-3 text-blue-900 flex items-center">
+                                            <span class="mr-2">📦</span>Items:
+                                        </p>
+                                        <ul class="text-blue-700/80 space-y-2">
+                                            <template x-for="item in order.items" :key="item.id">
+                                                <li class="flex justify-between items-center bg-white/50 p-2 rounded-lg">
+                                                    <span class="font-medium" x-text="item.listing_title"></span>
+                                                    <span class="bg-blue-500/10 text-blue-700 px-3 py-1 rounded-full font-bold" 
+                                                          x-text="item.quantity + ' kg'"></span>
+                                                </li>
+                                            </template>
+                                        </ul>
+                                        <p class="mt-4 font-bold text-right text-blue-900 text-lg">Total: ৳<span x-text="order.total_amount"></span></p>
+                                    </div>
+
+                                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-3 sm:space-y-0">
+                                        <div class="flex justify-end sm:justify-start">
+                                            <button @click="alert('Comment feature coming soon!')" class="text-blue-600 hover:text-blue-800 text-sm flex items-center font-medium transform hover:scale-105 transition-transform duration-300">
+                                                <span class="mr-2 text-lg">💬</span> Add Comment
+                                            </button>
+                                        </div>
+                                        <div class="flex space-x-3 justify-end" x-show="order.status === 'pending'">
+                                            <button @click="updateOrderStatus(order.id, 'confirmed')" 
+                                                    class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 font-medium shadow-lg flex-1 sm:flex-none">
+                                                ✅ Accept
+                                            </button>
+                                            <button @click="updateOrderStatus(order.id, 'cancelled')" 
+                                                    class="bg-gradient-to-r from-red-500 to-pink-600 text-white px-6 py-3 rounded-xl hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 font-medium shadow-lg flex-1 sm:flex-none">
+                                                ❌ Reject
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                        
+                        <div x-show="orders.length === 0" class="text-center py-12">
+                            <div class="text-6xl mb-6 text-blue-300 animate-pulse">📦</div>
+                            <p class="text-blue-600/70 text-lg">No orders received yet</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="space-y-8">
+                <!-- Notifications -->
+                <div class="bg-white/80 backdrop-blur-lg rounded-3xl shadow-lg border border-green-100/50 overflow-hidden transform transition-all duration-300 hover:shadow-xl">
+                    <div class="px-6 py-5 border-b border-green-100/50 bg-gradient-to-r from-purple-50 to-indigo-50/50">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-lg font-bold text-purple-900 flex items-center">
+                                <span class="mr-3 text-xl animate-ping">🔔</span>Notifications
+                            </h2>
+                            <div class="flex items-center space-x-3">
+                                <span class="bg-gradient-to-r from-red-500 to-pink-600 text-white text-xs px-3 py-1.5 rounded-full font-bold shadow-lg transform hover:scale-110 transition-transform duration-300" 
+                                      x-show="unreadNotifications > 0" x-text="unreadNotifications"></span>
+                                <button @click="markAllRead()" 
+                                        class="text-sm text-purple-600 hover:text-purple-800 font-medium transform hover:scale-105 transition-transform duration-300" 
+                                        x-show="unreadNotifications > 0">
+                                    Mark all read
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-4">
+                        <div class="space-y-4 max-h-64 overflow-y-auto custom-scrollbar">
+                            <template x-for="notification in notifications" :key="notification.id">
+                                <div :class="notification.is_read ? 'bg-white/50' : 'bg-gradient-to-r from-blue-50 to-cyan-50/80'" 
+                                     class="border-l-4 border-purple-500 p-4 rounded-xl text-sm cursor-pointer hover:shadow-lg transition-all duration-300 transform hover:-translate-x-1 group"
+                                     @click="handleNotificationClick(notification)">
+                                    <p class="font-semibold text-purple-900 group-hover:text-purple-700" x-text="notification.message"></p>
+                                    <p class="text-purple-600/70 text-xs mt-2" x-text="new Date(notification.created_at).toLocaleString()"></p>
+                                </div>
+                            </template>
+                            <div x-show="notifications.length === 0" class="text-center py-8 text-purple-400">
+                                <span class="text-4xl mb-3 block">🔕</span>
+                                No notifications
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Messages -->
+                <div class="bg-white/80 backdrop-blur-lg rounded-3xl shadow-lg border border-green-100/50 overflow-hidden transform transition-all duration-300 hover:shadow-xl">
+                    <div class="px-6 py-5 border-b border-green-100/50 bg-gradient-to-r from-teal-50 to-emerald-50/50">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-lg font-bold text-teal-900 flex items-center">
+                                <span class="mr-3 text-xl animate-bounce">💬</span>Messages
+                            </h2>
+                            <span class="bg-gradient-to-r from-teal-500 to-emerald-600 text-white text-xs px-3 py-1.5 rounded-full font-bold shadow-lg transform hover:scale-110 transition-transform duration-300" 
+                                  x-show="unreadMessagesCount > 0" x-text="unreadMessagesCount"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="p-4">
+                        <div class="space-y-4 max-h-64 overflow-y-auto custom-scrollbar">
+                            <template x-for="room in chatRooms" :key="room.id">
+                                <div class="p-4 border border-teal-200/50 rounded-xl hover:shadow-lg cursor-pointer transition-all duration-300 bg-white/50 backdrop-blur-sm transform hover:-translate-y-1 group"
+                                     @click="openChat(room)">
+                                    <p class="text-sm font-semibold text-teal-900 group-hover:text-teal-700" 
+                                       :class="room.unread_count > 0 ? 'font-bold' : 'font-semibold'" 
+                                       x-text="room.other_user"></p>
+                                    <p class="text-xs text-teal-600/70 mt-2 line-clamp-1" x-text="room.last_message?.substring(0, 50) + '...'"></p>
+                                    <div class="flex justify-between items-center mt-3">
+                                        <span class="text-teal-500/60 text-xs" x-text="room.last_message_time"></span>
+                                        <span x-show="room.unread_count > 0" class="bg-gradient-to-r from-teal-500 to-emerald-600 text-white text-xs px-2 py-1 rounded-full font-bold">
+                                            <span x-text="room.unread_count"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </template>
+                            <div x-show="chatRooms.length === 0" class="text-center py-8 text-teal-400">
+                                <span class="text-4xl mb-3 block">💭</span>
+                                No messages
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Connect with Experts -->
+                <div class="bg-gradient-to-br from-green-100/80 to-emerald-200/80 backdrop-blur-lg rounded-3xl shadow-lg border border-green-200/50 overflow-hidden transform transition-all duration-300 hover:shadow-2xl group">
+                    <div class="p-6">
+                        <h2 class="text-lg font-bold text-green-900 mb-4 flex items-center">
+                            <span class="mr-3 text-2xl animate-pulse">👨‍🌾</span>Connect with Experts
+                        </h2>
+                        <p class="text-green-700/80 text-sm mb-6 leading-relaxed">Need advice? Browse our directory of agricultural experts and ask questions or chat directly.</p>
+                        <a href="/experts/directory/" class="block w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white text-center px-6 py-4 rounded-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 font-bold shadow-lg mb-5 group-hover:scale-105">
+                            🌟 Find an Expert
+                        </a>
+                        <div class="pt-5 border-t border-green-200/50">
+                            <a href="/experts/questions/" class="flex items-center justify-between text-sm text-green-700 hover:text-green-900 font-semibold transform hover:translate-x-2 transition-transform duration-300">
+                                <span>📚 View My Questions</span>
+                                <span class="text-lg animate-pulse">→</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="bg-white/80 backdrop-blur-lg rounded-3xl shadow-lg border border-green-100/50 overflow-hidden transform transition-all duration-300 hover:shadow-xl">
+                    <div class="p-6">
+                        <h3 class="font-bold text-green-900 mb-5 flex items-center text-lg">
+                            <span class="mr-3 text-xl">⚡</span>Quick Links
+                        </h3>
+                        <div class="space-y-4">
+                            <a href="/experts/directory/" class="flex items-center text-sm text-green-700 hover:text-green-900 font-semibold transform hover:translate-x-2 transition-transform duration-300 group">
+                                <span class="mr-3 text-lg group-hover:scale-110 transition-transform duration-300">🔍</span> Browse Experts
+                            </a>
+                            <a href="/experts/questions/" class="flex items-center text-sm text-green-700 hover:text-green-900 font-semibold transform hover:translate-x-2 transition-transform duration-300 group">
+                                <span class="mr-3 text-lg group-hover:scale-110 transition-transform duration-300">💡</span> View Expert Answers
+                            </a>
+                            <a href="/experts/suggestions/" class="flex items-center text-sm text-green-700 hover:text-green-900 font-semibold transform hover:translate-x-2 transition-transform duration-300 group">
+                                <span class="mr-3 text-lg group-hover:scale-110 transition-transform duration-300">🌱</span> Browse Suggestions
+                            </a>
+                            <a href="/farmers/listings/" class="flex items-center text-sm text-green-700 hover:text-green-900 font-semibold transform hover:translate-x-2 transition-transform duration-300 group">
+                                <span class="mr-3 text-lg group-hover:scale-110 transition-transform duration-300">📊</span> Manage All Listings
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Enhanced Chat Modal -->
+<div x-data="chatModal()" @open-chat.window="openChat($event.detail)">
+    <div x-show="showChatModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all duration-300" 
+         x-transition:enter="ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         @click.self="closeChat()">
+        <div class="bg-white rounded-3xl w-full max-w-2xl mx-auto flex flex-col shadow-2xl transform transition-all duration-500"
+             x-transition:enter="ease-out duration-500"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             style="height: 600px; max-height: 90vh;" @click.stop>
+            <div class="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-6 rounded-t-3xl flex justify-between items-center">
+                <h3 class="font-bold text-xl flex items-center">
+                    <span class="mr-3 animate-pulse">💬</span> 
+                    Chat with <span x-text="selectedRoom?.other_user" class="ml-2"></span>
+                </h3>
+                <button @click="closeChat()" class="text-white hover:text-green-200 text-3xl font-bold transition-transform duration-300 hover:scale-110">&times;</button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-6 space-y-4 bg-gradient-to-b from-green-50 to-emerald-50/30 custom-scrollbar" x-ref="chatMessages">
+                <template x-for="msg in chatMessages" :key="msg.id">
+                    <div :class="msg.sender === currentUserId ? 'text-right' : 'text-left'">
+                        <div :class="msg.sender === currentUserId ? 
+                                    'bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-l-2xl rounded-tr-2xl' : 
+                                    'bg-white border border-green-200/50 rounded-r-2xl rounded-tl-2xl shadow-sm'" 
+                             class="px-5 py-3 max-w-xs inline-block transform transition-all duration-300 hover:scale-105">
+                            <p class="text-sm" x-text="msg.content"></p>
+                            <p class="text-xs opacity-80 mt-2" x-text="new Date(msg.timestamp).toLocaleTimeString()"></p>
+                        </div>
+                    </div>
+                </template>
+            </div>
+            
+            <div class="p-6 border-t border-green-200/50 bg-white rounded-b-3xl">
+                <form @submit.prevent="sendChatMessage()" class="flex space-x-4">
+                    <input type="text" x-model="newMessage" placeholder="Type your message..." 
+                           class="flex-1 border border-green-300 rounded-2xl px-5 py-4 focus:ring-4 focus:ring-green-500/20 focus:border-green-500 transition-all duration-300 bg-green-50/50">
+                    <button type="submit" 
+                            class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-8 py-4 rounded-2xl hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 font-bold shadow-lg flex items-center">
+                        <span class="mr-2">🚀</span> Send
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function chatModal() {
+            return {
+                showChatModal: false,
+                selectedRoom: null,
+                chatMessages: [],
+                newMessage: '',
+                currentUserId: {{ request.user.id|default:'null' }},
+                pollInterval: null,
+
+                openChat(room) {
+                    this.showChatModal = true;
+                    this.selectedRoom = room;
+                    this.loadChatMessages(room.id);
+                    this.startPolling();
+                },
+
+                closeChat() {
+                    this.showChatModal = false;
+                    this.stopPolling();
+                },
+
+                startPolling() {
+                    this.stopPolling();
+                    this.pollInterval = setInterval(() => {
+                        if (this.selectedRoom) {
+                            this.loadChatMessages(this.selectedRoom.id, false);
+                        }
+                    }, 3000);
+                },
+
+                stopPolling() {
+                    if (this.pollInterval) {
+                        clearInterval(this.pollInterval);
+                        this.pollInterval = null;
+                    }
+                },
+
+                async loadChatMessages(roomId, scrollToBottom = true) {
+                    try {
+                        const response = await fetch(`/api/notifications/messages/?room=${roomId}`);
+                        if (response.ok) {
+                            const newMessages = await response.json();
+                            if (newMessages.length !== this.chatMessages.length || newMessages[newMessages.length-1]?.id !== this.chatMessages[this.chatMessages.length-1]?.id) {
+                                this.chatMessages = newMessages;
+                                if (scrollToBottom) {
+                                    this.$nextTick(() => {
+                                        this.$refs.chatMessages.scrollTop = this.$refs.chatMessages.scrollHeight;
+                                    });
+                                }
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                    }
+                },
+                
+                async sendChatMessage() {
+                    if (!this.newMessage.trim()) return;
+                    
+                    try {
+                        const response = await fetch('/api/notifications/chat/send/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': this.getCookie('csrftoken')
+                            },
+                            body: JSON.stringify({
+                                room_id: this.selectedRoom.id,
+                                content: this.newMessage
+                            })
+                        });
+                        
+                        if (response.ok) {
+                            this.newMessage = '';
+                            await this.loadChatMessages(this.selectedRoom.id);
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                    }
+                },
+                
+                getCookie(name) {
+                    let cookieValue = null;
+                    if (document.cookie && document.cookie !== '') {
+                        const cookies = document.cookie.split(';');
+                        for (let i = 0; i < cookies.length; i++) {
+                            const cookie = cookies[i].trim();
+                            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                break;
+                            }
+                        }
+                    }
+                    return cookieValue;
+                }
+            }
+        }
+    </script>
+</div>
+
+<style>
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(34, 197, 94, 0.1);
+    border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, #10b981, #059669);
+    border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, #059669, #047857);
+}
+
+.line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+</style>
+
+<script>
+function farmerDashboard() {
+    return {
+        listings: [],
+        marketPrices: [],
+        totalRevenue: 0,
+        questionsCount: 0,
+        questionText: '',
+        notifications: [],
+        unreadNotifications: 0,
+        chatRooms: [],
+        unreadMessagesCount: 0,
+        orders: [],
+        
+        init() {
+            this.fetchListings();
+            this.fetchMarketPrices();
+            this.fetchNotifications();
+            this.fetchChatRooms();
+            this.fetchOrders();
+            this.startPollingNotificationsAndChat();
+        },
+
+        startPollingNotificationsAndChat() {
+            setInterval(() => {
+                this.fetchNotifications();
+                this.fetchChatRooms();
+                this.fetchOrders();
+            }, 5000); 
+        },
+        
+        async fetchListings() {
+            try {
+                const response = await fetch('/api/farmers/listings/');
+                if (response.ok) {
+                    this.listings = await response.json();
+                }
+            } catch (error) {
+                console.error('Error fetching listings:', error);
+            }
+        },
+        
+        async fetchMarketPrices() {
+            try {
+                const response = await fetch('/api/farmers/market-prices/');
+                if (response.ok) {
+                    const data = await response.json();
+                    this.marketPrices = data.slice(0, 5);
+                }
+            } catch (error) {
+                console.error('Error fetching market prices:', error);
+            }
+        },
+
+        async fetchNotifications() {
+            try {
+                const response = await fetch('/api/notifications/notifications/');
+                if (response.ok) {
+                    const newNotifications = await response.json();
+                    if (JSON.stringify(newNotifications) !== JSON.stringify(this.notifications)) {
+                        this.notifications = newNotifications;
+                        this.unreadNotifications = this.notifications.filter(n => !n.is_read).length;
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching notifications:', error);
+            }
+        },
+        
+        async fetchChatRooms() {
+            try {
+                const response = await fetch('/api/notifications/chat-rooms/');
+                if (response.ok) {
+                    const newChatRooms = await response.json();
+                    if (JSON.stringify(newChatRooms) !== JSON.stringify(this.chatRooms)) {
+                        this.chatRooms = newChatRooms;
+                        this.unreadMessagesCount = this.chatRooms.reduce((count, room) => {
+                            return count + (room.unread_count || 0);
+                        }, 0);
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching chat rooms:', error);
+            }
+        },
+
+        async fetchOrders() {
+            try {
+                const response = await fetch('/api/farmers/orders/');
+                if (response.ok) {
+                    const newOrders = await response.json();
+                    if (JSON.stringify(newOrders) !== JSON.stringify(this.orders)) {
+                        this.orders = newOrders;
+                        this.totalRevenue = this.orders
+                            .filter(o => o.status === 'confirmed' || o.status === 'delivered')
+                            .reduce((sum, o) => sum + parseFloat(o.total_amount), 0);
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching orders:', error);
+            }
+        },
+
+        async updateOrderStatus(orderId, status) {
+            try {
+                const response = await fetch(`/api/farmers/orders/${orderId}/`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': this.getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ status: status })
+                });
+                
+                if (response.ok) {
+                    const orderIndex = this.orders.findIndex(o => o.id === orderId);
+                    if (orderIndex !== -1) {
+                        this.orders[orderIndex].status = status;
+                        this.totalRevenue = this.orders
+                            .filter(o => o.status === 'confirmed' || o.status === 'delivered')
+                            .reduce((sum, o) => sum + parseFloat(o.total_amount), 0);
+                    }
+                } else {
+                    alert('Failed to update order status');
+                }
+            } catch (error) {
+                console.error('Error updating order:', error);
+                alert('Error updating order status');
+            }
+        },
+        
+        openChat(room) {
+            this.notifications.forEach(n => {
+                if (!n.is_read && n.link && n.link.includes(`/chat/${room.id}/`)) {
+                    this.markAsRead(n);
+                }
+            });
+            window.dispatchEvent(new CustomEvent('open-chat', { detail: room }));
+        },
+        
+        async handleNotificationClick(notification) {
+            await this.markAsRead(notification);
+            
+            if (notification.link && notification.link.includes('/chat/')) {
+                const match = notification.link.match(/\/chat\/(\d+)\//);
+                if (match) {
+                    const roomId = parseInt(match[1]);
+                    let room = this.chatRooms.find(r => r.id === roomId);
+                    
+                    if (room) {
+                        this.openChat(room);
+                    } else {
+                        await this.fetchChatRooms();
+                        room = this.chatRooms.find(r => r.id === roomId);
+                        if (room) {
+                            this.openChat(room);
+                        }
+                    }
+                }
+            } else if (notification.link) {
+                window.location.href = notification.link;
+            }
+        },
+
+        async markAsRead(notification) {
+            if (notification.is_read) return;
+            
+            try {
+                const response = await fetch(`/api/notifications/notifications/${notification.id}/`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': this.getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ is_read: true })
+                });
+
+                if (response.ok) {
+                    notification.is_read = true;
+                    this.unreadNotifications = Math.max(0, this.unreadNotifications - 1);
+                }
+            } catch (error) {
+                console.error('Error marking notification as read:', error);
+            }
+        },
+
+        async markAllRead() {
+            try {
+                await fetch('/api/notifications/notifications/mark_all_read/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': this.getCookie('csrftoken')
+                    }
+                });
+                this.notifications.forEach(n => n.is_read = true);
+                this.unreadNotifications = 0;
+            } catch (error) {
+                console.error('Error marking all as read:', error);
+            }
+        },
+        
+        getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    }
+}
+</script>
+
+{% endblock %}

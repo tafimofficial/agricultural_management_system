@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}My Orders{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto" x-data="ordersPage()">
+    <h2 class="text-2xl font-bold mb-6">My Orders</h2>
+    
+    <div class="space-y-4">
+        <template x-for="order in orders" :key="order.id">
+            <div class="bg-white p-6 rounded-xl shadow-md">
+                <div class="flex justify-between items-start mb-4 border-b pb-4">
+                    <div>
+                        <p class="font-bold text-lg">Order #<span x-text="order.id"></span></p>
+                        <p class="text-sm text-gray-500" x-text="new Date(order.created_at).toLocaleDateString()"></p>
+                    </div>
+                    <span class="px-3 py-1 rounded-full text-sm font-semibold" 
+                          :class="{
+                              'bg-yellow-100 text-yellow-800': order.status === 'pending',
+                              'bg-green-100 text-green-800': order.status === 'completed',
+                              'bg-red-100 text-red-800': order.status === 'cancelled'
+                          }" 
+                          x-text="order.status.charAt(0).toUpperCase() + order.status.slice(1)"></span>
+                </div>
+                
+                <div class="space-y-2 mb-4">
+                    <template x-for="item in order.items" :key="item.id">
+                        <div class="flex justify-between text-sm">
+                            <span><span x-text="item.quantity"></span>kg × Product #<span x-text="item.listing"></span></span>
+                            <span class="font-medium">৳<span x-text="item.price"></span></span>
+                        </div>
+                    </template>
+                </div>
+                
+                <div class="flex justify-between items-center pt-2 border-t">
+                    <span class="font-bold">Total Amount</span>
+                    <span class="font-bold text-xl text-green-600">৳<span x-text="order.total_amount"></span></span>
+                </div>
+            </div>
+        </template>
+        
+        <div x-show="orders.length === 0" class="text-center py-12 bg-white rounded-xl shadow-md">
+            <div class="text-6xl mb-4 opacity-20">📦</div>
+            <p class="text-gray-500">You haven't placed any orders yet.</p>
+            <a href="{% url 'dashboard' %}" class="inline-block mt-4 text-green-600 hover:underline">Start Shopping</a>
+        </div>
+    </div>
+</div>
+
+<script>
+function ordersPage() {
+    return {
+        orders: [],
+        init() {
+            this.fetchOrders();
+        },
+        async fetchOrders() {
+            try {
+                const response = await fetch('/api/buyers/orders/');
+                if (response.ok) {
+                    this.orders = await response.json();
+                }
+            } catch (error) {
+                console.error('Error fetching orders:', error);
+            }
+        }
+    }
+}
+</script>
+{% endblock %}

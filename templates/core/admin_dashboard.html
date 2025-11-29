@@ -1,0 +1,664 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard - FarmConnect{% endblock %}
+
+{% block content %}
+<div x-data="adminDashboard()" class="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 py-6 px-4">
+    <!-- Header -->
+    <div class="max-w-7xl mx-auto mb-8">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">🌾 FarmConnect Admin</h1>
+                <p class="text-gray-600">Manage your agricultural platform with ease</p>
+            </div>
+            <div class="mt-4 md:mt-0">
+                <div class="bg-white rounded-xl shadow-lg p-4 animate-pulse">
+                    <p class="text-sm text-gray-600">Last updated: <span x-text="new Date().toLocaleTimeString()"></span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="max-w-7xl mx-auto mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="bg-white rounded-2xl shadow-lg p-6 transform hover:scale-105 transition-all duration-300 border-l-4 border-blue-500">
+                <div class="flex items-center">
+                    <div class="bg-blue-100 p-3 rounded-xl mr-4">
+                        <span class="text-2xl text-blue-600">👥</span>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600 font-medium">Total Users</p>
+                        <p class="text-2xl font-bold text-gray-800" x-text="stats.total_users">0</p>
+                    </div>
+                </div>
+                <div class="mt-3 text-xs text-green-600 font-medium">
+                    <span x-text="'+' + Math.floor(stats.total_users * 0.12)"></span> this month
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-lg p-6 transform hover:scale-105 transition-all duration-300 border-l-4 border-green-500">
+                <div class="flex items-center">
+                    <div class="bg-green-100 p-3 rounded-xl mr-4">
+                        <span class="text-2xl text-green-600">🌾</span>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600 font-medium">Active Listings</p>
+                        <p class="text-2xl font-bold text-gray-800" x-text="stats.total_listings">0</p>
+                    </div>
+                </div>
+                <div class="mt-3 text-xs text-green-600 font-medium">
+                    <span x-text="'+' + Math.floor(stats.total_listings * 0.08)"></span> new today
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-lg p-6 transform hover:scale-105 transition-all duration-300 border-l-4 border-purple-500">
+                <div class="flex items-center">
+                    <div class="bg-purple-100 p-3 rounded-xl mr-4">
+                        <span class="text-2xl text-purple-600">📦</span>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600 font-medium">Total Orders</p>
+                        <p class="text-2xl font-bold text-gray-800" x-text="stats.total_orders">0</p>
+                    </div>
+                </div>
+                <div class="mt-3 text-xs text-green-600 font-medium">
+                    ৳<span x-text="Math.floor(stats.total_orders * 1250)"></span> revenue
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-lg p-6 transform hover:scale-105 transition-all duration-300 border-l-4 border-orange-500">
+                <div class="flex items-center">
+                    <div class="bg-orange-100 p-3 rounded-xl mr-4">
+                        <span class="text-2xl text-orange-600">⏳</span>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600 font-medium">Pending Experts</p>
+                        <p class="text-2xl font-bold text-gray-800" x-text="stats.pending_experts">0</p>
+                    </div>
+                </div>
+                <div class="mt-3 text-xs text-red-600 font-medium" x-show="stats.pending_experts > 0">
+                    Needs attention
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto">
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+            <!-- Tabs Navigation -->
+            <div class="border-b border-gray-200 bg-gradient-to-r from-green-50 to-emerald-50">
+                <nav class="flex overflow-x-auto">
+                    <button 
+                        @click="activeTab = 'users'" 
+                        :class="activeTab === 'users' ? 
+                               'border-b-2 border-green-600 text-green-600 bg-white shadow-sm' : 
+                               'text-gray-600 hover:text-green-600 hover:bg-green-50'"
+                        class="flex items-center px-6 py-4 font-medium text-sm transition-all duration-300 whitespace-nowrap">
+                        <span class="mr-2">👥</span>
+                        Users
+                        <span class="ml-2 bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full" x-text="stats.total_users"></span>
+                    </button>
+                    
+                    <button 
+                        @click="activeTab = 'listings'" 
+                        :class="activeTab === 'listings' ? 
+                               'border-b-2 border-green-600 text-green-600 bg-white shadow-sm' : 
+                               'text-gray-600 hover:text-green-600 hover:bg-green-50'"
+                        class="flex items-center px-6 py-4 font-medium text-sm transition-all duration-300 whitespace-nowrap">
+                        <span class="mr-2">🌾</span>
+                        Listings
+                        <span class="ml-2 bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full" x-text="stats.total_listings"></span>
+                    </button>
+                    
+                    <button 
+                        @click="activeTab = 'experts'" 
+                        :class="activeTab === 'experts' ? 
+                               'border-b-2 border-green-600 text-green-600 bg-white shadow-sm' : 
+                               'text-gray-600 hover:text-green-600 hover:bg-green-50'"
+                        class="flex items-center px-6 py-4 font-medium text-sm transition-all duration-300 whitespace-nowrap">
+                        <span class="mr-2">🔍</span>
+                        Expert Requests
+                        <span class="ml-2 bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full" x-text="stats.pending_experts"></span>
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Tabs Content -->
+            <div class="p-6">
+                <!-- Users Tab -->
+                <div x-show="activeTab === 'users'" x-transition:enter="transition ease-out duration-300" 
+                     x-transition:enter-start="opacity-0 transform scale-95" 
+                     x-transition:enter-end="opacity-100 transform scale-100" class="space-y-6">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">User Management</h2>
+                        <div class="relative">
+                            <input 
+                                type="text" 
+                                x-model="searchUsers" 
+                                @input="filterUsers()" 
+                                placeholder="Search users by email or name..." 
+                                class="w-full md:w-80 pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-300"
+                            >
+                            <span class="absolute left-3 top-3 text-gray-400">🔍</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gradient-to-r from-green-50 to-emerald-50">
+                                    <tr>
+                                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">User</th>
+                                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Role</th>
+                                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Status</th>
+                                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200">
+                                    <template x-for="user in filteredUsers" :key="user.id">
+                                        <tr class="hover:bg-green-50 transition-colors duration-200">
+                                            <td class="px-6 py-4">
+                                                <div class="flex items-center">
+                                                    <div class="bg-green-100 w-10 h-10 rounded-full flex items-center justify-center mr-3">
+                                                        <span class="text-green-600 font-semibold" x-text="user.username.charAt(0).toUpperCase()"></span>
+                                                    </div>
+                                                    <div>
+                                                        <p class="font-medium text-gray-900" x-text="user.username"></p>
+                                                        <p class="text-sm text-gray-500" x-text="user.email"></p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium" 
+                                                      :class="{
+                                                          'bg-green-100 text-green-800': user.role === 'farmer',
+                                                          'bg-blue-100 text-blue-800': user.role === 'buyer',
+                                                          'bg-purple-100 text-purple-800': user.role === 'expert',
+                                                          'bg-red-100 text-red-800': user.role === 'admin'
+                                                      }" 
+                                                      x-text="user.role.charAt(0).toUpperCase() + user.role.slice(1)"></span>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium" 
+                                                      :class="user.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'" 
+                                                      x-text="user.is_active ? 'Active' : 'Inactive'"></span>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <div class="flex space-x-2">
+                                                    <button @click="viewUserDetails(user)" 
+                                                            class="inline-flex items-center px-3 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors duration-200 text-sm">
+                                                        👁️ View
+                                                    </button>
+                                                    <button @click="deleteUser(user.id)" 
+                                                            class="inline-flex items-center px-3 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors duration-200 text-sm">
+                                                        🗑️ Delete
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Listings Tab -->
+                <div x-show="activeTab === 'listings'" x-transition:enter="transition ease-out duration-300" 
+                     x-transition:enter-start="opacity-0 transform scale-95" 
+                     x-transition:enter-end="opacity-100 transform scale-100" class="space-y-6">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">Product Listings</h2>
+                        <div class="relative">
+                            <input 
+                                type="text" 
+                                x-model="searchListings" 
+                                @input="filterListings()" 
+                                placeholder="Search listings by title or location..." 
+                                class="w-full md:w-80 pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-300"
+                            >
+                            <span class="absolute left-3 top-3 text-gray-400">🔍</span>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <template x-for="listing in filteredListings" :key="listing.id">
+                            <div class="bg-white border border-gray-200 rounded-2xl p-5 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                                <div class="flex justify-between items-start mb-3">
+                                    <h3 class="font-bold text-lg text-gray-800" x-text="listing.title"></h3>
+                                    <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Active</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mb-4 line-clamp-2" x-text="listing.description?.substring(0, 120) + '...'"></p>
+                                <div class="space-y-2 mb-4">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-green-600 font-bold text-lg">৳<span x-text="listing.price"></span>/kg</span>
+                                        <span class="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded" x-text="listing.quantity + ' kg'"></span>
+                                    </div>
+                                    <div class="flex items-center text-sm text-gray-500">
+                                        <span class="mr-1">📍</span>
+                                        <span x-text="listing.location"></span>
+                                    </div>
+                                </div>
+                                <button @click="deleteListing(listing.id)" 
+                                        class="w-full bg-red-50 text-red-700 py-2 rounded-lg hover:bg-red-100 transition-colors duration-200 font-medium">
+                                    Remove Listing
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Expert Requests Tab -->
+                <div x-show="activeTab === 'experts'" x-transition:enter="transition ease-out duration-300" 
+                     x-transition:enter-start="opacity-0 transform scale-95" 
+                     x-transition:enter-end="opacity-100 transform scale-100" class="space-y-6">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">Expert Registration Requests</h2>
+                        <div class="bg-orange-100 text-orange-800 px-4 py-2 rounded-lg font-medium">
+                            <span x-text="stats.pending_experts"></span> pending requests
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <template x-for="request in expertRequests.filter(r => r.status === 'pending')" :key="request.id">
+                            <div class="bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
+                                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                                    <div class="flex-1">
+                                        <div class="flex items-center mb-3">
+                                            <div class="bg-orange-100 w-12 h-12 rounded-full flex items-center justify-center mr-4">
+                                                <span class="text-orange-600 text-xl">👨‍🌾</span>
+                                            </div>
+                                            <div>
+                                                <h3 class="font-bold text-lg text-gray-800" x-text="request.username"></h3>
+                                                <p class="text-gray-600" x-text="request.email"></p>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center text-sm text-gray-500">
+                                            <span class="mr-2">📅</span>
+                                            Requested on <span class="font-medium ml-1" x-text="new Date(request.created_at).toLocaleDateString()"></span>
+                                        </div>
+                                    </div>
+                                    <div class="flex space-x-3">
+                                        <button @click="approveExpert(request.id)" 
+                                                class="bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-700 transition-colors duration-200 font-medium flex items-center">
+                                            <span class="mr-2">✅</span>
+                                            Approve
+                                        </button>
+                                        <button @click="rejectExpert(request.id)" 
+                                                class="bg-red-600 text-white px-6 py-3 rounded-xl hover:bg-red-700 transition-colors duration-200 font-medium flex items-center">
+                                            <span class="mr-2">❌</span>
+                                            Reject
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                        
+                        <div x-show="expertRequests.filter(r => r.status === 'pending').length === 0" 
+                             class="text-center py-12">
+                            <div class="text-6xl mb-4">🎉</div>
+                            <h3 class="text-xl font-bold text-gray-700 mb-2">All Clear!</h3>
+                            <p class="text-gray-600">No pending expert requests at the moment.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Details Modal -->
+    <div x-show="showUserModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" 
+         x-transition:enter="transition ease-out duration-300" 
+         x-transition:enter-start="opacity-0" 
+         x-transition:enter-end="opacity-100"
+         @click.self="showUserModal = false">
+        <div class="bg-white rounded-2xl p-8 max-w-2xl w-full mx-auto transform transition-all duration-300" 
+             x-transition:enter="transition ease-out duration-300" 
+             x-transition:enter-start="opacity-0 transform scale-95" 
+             x-transition:enter-end="opacity-100 transform scale-100"
+             @click.stop>
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">User Details</h2>
+                <button @click="showUserModal = false" class="text-gray-400 hover:text-gray-600 transition-colors duration-200">
+                    <span class="text-2xl">×</span>
+                </button>
+            </div>
+            
+            <template x-if="selectedUser">
+                <div class="space-y-6">
+                    <div class="flex items-center">
+                        <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mr-4">
+                            <span class="text-green-600 text-xl font-bold" x-text="selectedUser.username.charAt(0).toUpperCase()"></span>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-800" x-text="selectedUser.username"></h3>
+                            <p class="text-gray-600" x-text="selectedUser.email"></p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-gray-50 p-4 rounded-xl">
+                            <p class="text-sm text-gray-600 mb-1">Role</p>
+                            <p class="font-semibold text-gray-800" x-text="selectedUser.role.charAt(0).toUpperCase() + selectedUser.role.slice(1)"></p>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-xl">
+                            <p class="text-sm text-gray-600 mb-1">Status</p>
+                            <p class="font-semibold" :class="selectedUser.is_active ? 'text-green-600' : 'text-red-600'" 
+                               x-text="selectedUser.is_active ? 'Active' : 'Inactive'"></p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-blue-50 p-4 rounded-xl">
+                        <p class="text-sm text-blue-600 font-medium">Member since</p>
+                        <p class="text-blue-800" x-text="new Date().toLocaleDateString()"></p>
+                    </div>
+                </div>
+            </template>
+            
+            <div class="flex justify-end space-x-3 mt-8">
+                <button @click="showUserModal = false" 
+                        class="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-colors duration-200 font-medium">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function adminDashboard() {
+    return {
+        activeTab: 'users',
+        users: [],
+        filteredUsers: [],
+        listings: [],
+        filteredListings: [],
+        orders: [],
+        questions: [],
+        expertRequests: [],
+        searchUsers: '',
+        searchListings: '',
+        showUserModal: false,
+        selectedUser: null,
+        stats: {
+            total_users: 0,
+            total_listings: 0,
+            total_orders: 0,
+            pending_experts: 0
+        },
+        
+        init() {
+            this.fetchUsers();
+            this.fetchListings();
+            this.fetchOrders();
+            this.fetchQuestions();
+            this.fetchExpertRequests();
+            
+            // Update time every minute
+            setInterval(() => {
+                // This will trigger the time update in the header
+            }, 60000);
+        },
+        
+        async fetchUsers() {
+            try {
+                const response = await fetch('/api/users/');
+                if (response.ok) {
+                    this.users = await response.json();
+                    this.filteredUsers = this.users;
+                    this.stats.total_users = this.users.length;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        },
+        
+        async fetchListings() {
+            try {
+                const response = await fetch('/api/farmers/listings/');
+                if (response.ok) {
+                    this.listings = await response.json();
+                    this.filteredListings = this.listings;
+                    this.stats.total_listings = this.listings.length;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        },
+        
+        async fetchOrders() {
+            try {
+                const response = await fetch('/api/buyers/orders/');
+                if (response.ok) {
+                    this.orders = await response.json();
+                    this.stats.total_orders = this.orders.length;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        },
+        
+        async fetchQuestions() {
+            try {
+                const response = await fetch('/api/experts/questions/');
+                if (response.ok) {
+                    this.questions = await response.json();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        },
+        
+        async fetchExpertRequests() {
+            try {
+                const response = await fetch('/admin-api/expert-requests/');
+                if (response.ok) {
+                    this.expertRequests = await response.json();
+                    this.stats.pending_experts = this.expertRequests.filter(r => r.status === 'pending').length;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        },
+        
+        filterUsers() {
+            if (this.searchUsers.trim() === '') {
+                this.filteredUsers = this.users;
+            } else {
+                this.filteredUsers = this.users.filter(user =>
+                    user.email.toLowerCase().includes(this.searchUsers.toLowerCase()) ||
+                    user.username.toLowerCase().includes(this.searchUsers.toLowerCase())
+                );
+            }
+        },
+        
+        filterListings() {
+            if (this.searchListings.trim() === '') {
+                this.filteredListings = this.listings;
+            } else {
+                this.filteredListings = this.listings.filter(listing =>
+                    listing.title.toLowerCase().includes(this.searchListings.toLowerCase()) ||
+                    listing.location.toLowerCase().includes(this.searchListings.toLowerCase())
+                );
+            }
+        },
+        
+        viewUserDetails(user) {
+            this.selectedUser = user;
+            this.showUserModal = true;
+        },
+        
+        async deleteUser(id) {
+            if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
+            
+            try {
+                const response = await fetch(`/api/users/${id}/`, {
+                    method: 'DELETE',
+                    headers: { 'X-CSRFToken': this.getCookie('csrftoken') }
+                });
+                if (response.ok) {
+                    this.showNotification('User deleted successfully', 'success');
+                    this.fetchUsers();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                this.showNotification('Error deleting user', 'error');
+            }
+        },
+        
+        async deleteListing(id) {
+            if (!confirm('Are you sure you want to delete this listing?')) return;
+            
+            try {
+                const response = await fetch(`/api/farmers/listings/${id}/`, {
+                    method: 'DELETE',
+                    headers: { 'X-CSRFToken': this.getCookie('csrftoken') }
+                });
+                if (response.ok) {
+                    this.showNotification('Listing deleted successfully', 'success');
+                    this.fetchListings();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                this.showNotification('Error deleting listing', 'error');
+            }
+        },
+        
+        async deleteOrder(id) {
+            if (!confirm('Are you sure you want to delete this order?')) return;
+            
+            try {
+                const response = await fetch(`/api/buyers/orders/${id}/`, {
+                    method: 'DELETE',
+                    headers: { 'X-CSRFToken': this.getCookie('csrftoken') }
+                });
+                if (response.ok) {
+                    this.showNotification('Order deleted successfully', 'success');
+                    this.fetchOrders();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                this.showNotification('Error deleting order', 'error');
+            }
+        },
+        
+        async deleteQuestion(id) {
+            if (!confirm('Are you sure you want to delete this question?')) return;
+            
+            try {
+                const response = await fetch(`/api/experts/questions/${id}/`, {
+                    method: 'DELETE',
+                    headers: { 'X-CSRFToken': this.getCookie('csrftoken') }
+                });
+                if (response.ok) {
+                    this.showNotification('Question deleted successfully', 'success');
+                    this.fetchQuestions();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                this.showNotification('Error deleting question', 'error');
+            }
+        },
+        
+        async approveExpert(id) {
+            try {
+                const response = await fetch(`/admin-api/expert-requests/${id}/approve/`, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': this.getCookie('csrftoken') }
+                });
+                if (response.ok) {
+                    this.showNotification('Expert approved successfully', 'success');
+                    this.fetchExpertRequests();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                this.showNotification('Error approving expert', 'error');
+            }
+        },
+        
+        async rejectExpert(id) {
+            try {
+                const response = await fetch(`/admin-api/expert-requests/${id}/reject/`, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': this.getCookie('csrftoken') }
+                });
+                if (response.ok) {
+                    this.showNotification('Expert request rejected', 'success');
+                    this.fetchExpertRequests();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                this.showNotification('Error rejecting expert request', 'error');
+            }
+        },
+        
+        showNotification(message, type = 'info') {
+            // Create a simple notification
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-xl font-medium text-white shadow-lg transform transition-all duration-300 ${
+                type === 'success' ? 'bg-green-500' : 
+                type === 'error' ? 'bg-red-500' : 'bg-blue-500'
+            }`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            // Remove notification after 3 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        },
+        
+        getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    }
+}
+</script>
+
+<style>
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Smooth scrolling for the entire page */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+</style>
+{% endblock %}

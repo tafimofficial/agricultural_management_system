@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white p-8 rounded-xl shadow-md">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-3xl font-bold text-green-800">My Profile</h2>
+            <a href="{% url 'dashboard' %}" class="text-blue-600 hover:underline">← Back to Dashboard</a>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="space-y-6" x-data="{ previewAvatar: {% if user.profile.avatar %}'{{ user.profile.avatar.url }}'{% else %}null{% endif %} }">
+            {% csrf_token %}
+            
+            <!-- User Information -->
+            <div class="border-b pb-6">
+                <h3 class="text-xl font-bold mb-4">Account Information</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                        <input type="text" name="username" value="{{ user.username }}" class="w-full border border-gray-300 rounded-lg p-3 bg-gray-50" readonly>
+                        <p class="text-xs text-gray-500 mt-1">Username cannot be changed</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                        <input type="email" name="email" value="{{ user.email }}" required class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                        <input type="text" value="{{ user.get_role_display }}" class="w-full border border-gray-300 rounded-lg p-3 bg-gray-50" readonly>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Information -->
+            <div class="border-b pb-6">
+                <h3 class="text-xl font-bold mb-4">Profile Details</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+                        <input type="text" name="phone" value="{{ user.profile.phone }}" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="+880 1234567890">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                        <input type="text" name="address" value="{{ user.profile.address }}" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Your address">
+                    </div>
+                    
+                    {% if user.role == 'expert' %}
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Specialization</label>
+                        <input type="text" name="specialization" value="{{ user.profile.specialization }}" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., Crop Management, Soil Science">
+                    </div>
+                    {% endif %}
+                    
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Bio</label>
+                        <textarea name="bio" rows="4" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Tell us about yourself...">{{ user.profile.bio }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Avatar Upload -->
+            <div class="border-b pb-6">
+                <h3 class="text-xl font-bold mb-4">Profile Picture</h3>
+                <div class="flex items-center space-x-6">
+                    <div class="flex-shrink-0">
+                        <template x-if="previewAvatar">
+                            <img :src="previewAvatar" class="w-32 h-32 rounded-full object-cover border-4 border-green-500">
+                        </template>
+                        <template x-if="!previewAvatar">
+                            <div class="w-32 h-32 rounded-full bg-green-100 flex items-center justify-center text-4xl text-green-600">
+                                {{ user.username.0|upper }}
+                            </div>
+                        </template>
+                    </div>
+                    <div class="flex-1">
+                        <input type="file" name="avatar" accept="image/*" @change="previewAvatar = URL.createObjectURL($event.target.files[0])" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        <p class="text-xs text-gray-500 mt-2">Upload a profile picture (JPG, PNG, max 5MB)</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Change Password -->
+            <div class="border-b pb-6">
+                <h3 class="text-xl font-bold mb-4">Change Password</h3>
+                <p class="text-sm text-gray-600 mb-4">Leave blank if you don't want to change your password</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">New Password</label>
+                        <input type="password" name="new_password" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Enter new password">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
+                        <input type="password" name="confirm_password" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Confirm new password">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Buttons -->
+            <div class="flex space-x-4">
+                <button type="submit" class="flex-1 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                    Save Changes
+                </button>
+                <a href="{% url 'dashboard' %}" class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg hover:bg-gray-300 transition text-center">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

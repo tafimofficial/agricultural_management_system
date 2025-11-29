@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Listing{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-md">
+    <h2 class="text-2xl font-bold mb-6">Edit Produce Listing</h2>
+    
+    <form method="post" enctype="multipart/form-data" class="space-y-6">
+        {% csrf_token %}
+        
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+            <input type="text" name="title" value="{{ listing.title }}" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500">
+        </div>
+        
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <textarea name="description" rows="4" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500">{{ listing.description }}</textarea>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Price (per kg)</label>
+                <input type="number" name="price" step="0.01" value="{{ listing.price }}" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Quantity (kg)</label>
+                <input type="number" name="quantity" step="0.01" value="{{ listing.quantity }}" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500">
+            </div>
+        </div>
+        
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+            <input type="text" name="location" value="{{ listing.location }}" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500">
+        </div>
+        
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Image</label>
+            {% if listing.image %}
+                <div class="mb-2">
+                    <img src="{{ listing.image.url }}" alt="Current Image" class="h-32 w-32 object-cover rounded">
+                    <p class="text-xs text-gray-500 mt-1">Current image</p>
+                </div>
+            {% endif %}
+            <input type="file" name="image" accept="image/*" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500">
+        </div>
+        
+        <div class="flex justify-end space-x-4">
+            <a href="{% url 'dashboard' %}" class="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">Cancel</a>
+            <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition font-semibold">Update Listing</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

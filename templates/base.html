@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Krishi Management System - {% block title %}Home{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body class="bg-green-50 font-sans text-gray-900">
+    <nav class="bg-green-700 text-white shadow-lg" x-data="{ open: false }">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="/" class="text-2xl font-bold flex items-center space-x-2">
+                <span>🌱</span>
+                <span>Krishi System</span>
+            </a>
+            
+            <div class="hidden md:flex space-x-6 items-center" x-data="globalNotifications()">
+                <a href="/" class="hover:text-green-200 transition">Home</a>
+                {% if user.is_authenticated %}
+                    <!-- Role-based Links -->
+                    {% if user.role == 'farmer' %}
+                        <a href="{% url 'dashboard' %}" class="hover:text-green-200 transition relative">
+                            Farmer Dashboard
+                            <span x-show="unreadCount > 0" class="absolute -top-2 -right-3 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full" x-text="unreadCount"></span>
+                        </a>
+                        <a href="/farmers/listings/" class="hover:text-green-200 transition">My Listings</a>
+                    {% elif user.role == 'expert' %}
+                        <a href="{% url 'dashboard' %}" class="hover:text-green-200 transition relative">
+                            Expert Dashboard
+                            <span x-show="unreadCount > 0" class="absolute -top-2 -right-3 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full" x-text="unreadCount"></span>
+                        </a>
+                        <a href="/experts/questions/" class="hover:text-green-200 transition">Questions</a>
+                    {% elif user.role == 'buyer' %}
+                        <a href="{% url 'dashboard' %}" class="hover:text-green-200 transition relative">
+                            Buyer Dashboard
+                            <span x-show="unreadCount > 0" class="absolute -top-2 -right-3 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full" x-text="unreadCount"></span>
+                        </a>
+                        <a href="/buyers/orders/" class="hover:text-green-200 transition">My Orders</a>
+                    {% endif %}
+
+                    <div class="relative" x-data="{ dropdown: false }">
+                        <button @click="dropdown = !dropdown" class="flex items-center space-x-1 hover:text-green-200 focus:outline-none">
+                            <span>{{ user.username }}</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div x-show="dropdown" @click.away="dropdown = false" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-xl py-2 z-20 text-gray-800" x-cloak>
+                            <a href="{% url 'profile' %}" class="block px-4 py-2 hover:bg-green-100">Profile</a>
+                            <div class="border-t my-1"></div>
+                            <form action="{% url 'logout' %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="block w-full text-left px-4 py-2 hover:bg-red-100 text-red-600">Logout</button>
+                            </form>
+                        </div>
+                    </div>
+                {% else %}
+                    <a href="{% url 'login' %}" class="hover:text-green-200 transition">Login</a>
+                    <a href="{% url 'register' %}" class="bg-white text-green-700 px-4 py-2 rounded-full font-semibold hover:bg-green-100 transition">Register</a>
+                {% endif %}
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <button @click="open = !open" class="md:hidden focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div x-show="open" class="md:hidden bg-green-800 px-4 py-2 space-y-2" x-cloak>
+            <a href="/" class="block py-2 hover:bg-green-700 rounded">Home</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'dashboard' %}" class="block py-2 hover:bg-green-700 rounded">Dashboard</a>
+                <form action="{% url 'logout' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="block w-full text-left py-2 hover:bg-red-700 rounded text-red-200">Logout</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}" class="block py-2 hover:bg-green-700 rounded">Login</a>
+                <a href="{% url 'register' %}" class="block py-2 hover:bg-green-700 rounded">Register</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-8 min-h-screen">
+        {% if messages %}
+            <div class="mb-6 space-y-2">
+                {% for message in messages %}
+                    <div class="p-4 rounded-lg shadow-sm {% if message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}" x-data="{ show: true }" x-show="show">
+                        <div class="flex justify-between items-center">
+                            <span>{{ message }}</span>
+                            <button @click="show = false" class="text-sm font-bold">&times;</button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-gray-800 text-white py-8 mt-12">
+        <div class="container mx-auto px-4 text-center">
+            <p>&copy; 2024 Krishi Management System. All rights reserved.</p>
+        </div>
+    </footer>
+    <script>
+        function globalNotifications() {
+            return {
+                unreadCount: 0,
+                init() {
+                    {% if user.is_authenticated %}
+                        this.fetchUnreadCount();
+                        setInterval(() => this.fetchUnreadCount(), 10000); // Poll every 10 seconds
+                    {% endif %}
+                },
+                async fetchUnreadCount() {
+                    try {
+                        const response = await fetch('/api/notifications/notifications/');
+                        if (response.ok) {
+                            const notifications = await response.json();
+                            this.unreadCount = notifications.filter(n => !n.is_read).length;
+                        }
+                    } catch (error) {
+                        console.error('Error fetching notifications:', error);
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

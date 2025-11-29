@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Registration Pending{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-md text-center">
+    <div class="text-6xl mb-4">⏳</div>
+    <h2 class="text-3xl font-bold mb-4 text-green-800">Expert Registration Submitted</h2>
+    <p class="text-lg text-gray-600 mb-6">
+        Thank you for registering as an <strong>Expert</strong>! Your registration request has been submitted to our administrators for review.
+    </p>
+    <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6">
+        <p class="text-sm text-gray-700">
+            <strong>What happens next?</strong><br>
+            An administrator will review your credentials and approve your account within 24-48 hours. 
+            You will receive a notification once your account is approved.
+        </p>
+    </div>
+    <a href="{% url 'home' %}" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition inline-block">
+        Back to Home
+    </a>
+</div>
+{% endblock %}

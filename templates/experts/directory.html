@@ -1,0 +1,262 @@
+{% extends 'base.html' %}
+
+{% block title %}Expert Directory{% endblock %}
+
+{% block content %}
+<div x-data="expertDirectory()" class="space-y-6">
+    <div class="bg-white p-6 rounded-xl shadow-md">
+        <h2 class="text-3xl font-bold text-green-800 mb-6">Expert Directory</h2>
+        
+        <!-- Search and Filter -->
+        <div class="mb-6 flex space-x-4">
+            <input type="text" x-model="searchQuery" @input="filterExperts()" placeholder="Search by name or specialization..." class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500">
+            <select x-model="specializationFilter" @change="filterExperts()" class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500">
+                <option value="">All Specializations</option>
+                <option value="Crop Management">Crop Management</option>
+                <option value="Soil Science">Soil Science</option>
+                <option value="Pest Control">Pest Control</option>
+                <option value="Irrigation">Irrigation</option>
+                <option value="Organic Farming">Organic Farming</option>
+            </select>
+        </div>
+
+        <!-- Expert Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <template x-for="expert in filteredExperts" :key="expert.id">
+                <div class="border border-gray-200 rounded-xl p-6 hover:shadow-xl transition transform hover:-translate-y-1">
+                    <!-- Avatar -->
+                    <div class="flex items-center mb-4">
+                        <template x-if="expert.profile && expert.profile.avatar">
+                            <img :src="expert.profile.avatar" class="w-16 h-16 rounded-full object-cover mr-4">
+                        </template>
+                        <template x-if="!expert.profile || !expert.profile.avatar">
+                            <div class="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center text-2xl text-purple-600 mr-4" x-text="expert.username.charAt(0).toUpperCase()"></div>
+                        </template>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-lg" x-text="expert.username"></h3>
+                            <span class="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full">Expert</span>
+                        </div>
+                    </div>
+
+                    <!-- Specialization -->
+                    <div class="mb-4">
+                        <p class="text-sm text-gray-500 mb-1">Specialization:</p>
+                        <p class="font-medium text-gray-800" x-text="expert.profile?.specialization || 'General Agriculture'"></p>
+                    </div>
+
+                    <!-- Bio -->
+                    <div class="mb-4">
+                        <p class="text-sm text-gray-600" x-text="(expert.profile?.bio || 'No bio available').substring(0, 100) + '...'"></p>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex space-x-2">
+                        <button @click="startChat(expert)" class="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm">
+                            💬 Message
+                        </button>
+                        <button @click="askQuestion(expert)" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm">
+                            ❓ Ask Question
+                        </button>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <div x-show="filteredExperts.length === 0" class="text-center py-12">
+            <div class="text-6xl mb-4 opacity-20">🔍</div>
+            <p class="text-gray-500">No experts found matching your criteria.</p>
+        </div>
+    </div>
+
+    <!-- Chat Modal -->
+    <div x-show="showChatModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click.self="showChatModal = false">
+        <div class="bg-white rounded-xl w-full max-w-2xl mx-4 flex flex-col" style="height: 600px;" @click.stop>
+            <div class="bg-green-600 text-white p-4 rounded-t-xl flex justify-between items-center">
+                <h3 class="font-bold text-lg">Chat with <span x-text="selectedExpert?.username"></span></h3>
+                <button @click="showChatModal = false" class="text-white hover:text-gray-200">&times;</button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-4 space-y-3" x-ref="chatMessages">
+                <template x-for="msg in chatMessages" :key="msg.id">
+                    <div :class="msg.sender === {{ request.user.id|default:'null' }} ? 'text-right' : 'text-left'">
+                        <div :class="msg.sender === {{ request.user.id|default:'null' }} ? 'bg-green-100 inline-block' : 'bg-gray-100 inline-block'" class="px-4 py-2 rounded-lg max-w-xs">
+                            <p class="text-sm" x-text="msg.content"></p>
+                            <p class="text-xs text-gray-500 mt-1" x-text="new Date(msg.timestamp).toLocaleTimeString()"></p>
+                        </div>
+                    </div>
+                </template>
+            </div>
+            
+            <div class="p-4 border-t">
+                <form @submit.prevent="sendMessage()" class="flex space-x-2">
+                    <input type="text" x-model="newMessage" placeholder="Type your message..." class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500" required>
+                    <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">Send</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Question Modal -->
+    <div x-show="showQuestionModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click.self="showQuestionModal = false">
+        <div class="bg-white rounded-xl p-8 max-w-2xl w-full mx-4" @click.stop>
+            <h2 class="text-2xl font-bold mb-4">Ask <span x-text="selectedExpert?.username"></span></h2>
+            <form @submit.prevent="submitQuestion()" class="space-y-4">
+                <textarea x-model="questionText" rows="6" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500" placeholder="Describe your question in detail..." required></textarea>
+                <div class="flex space-x-2">
+                    <button type="submit" class="flex-1 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700">Submit Question</button>
+                    <button type="button" @click="showQuestionModal = false" class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg hover:bg-gray-300">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function expertDirectory() {
+    return {
+        experts: [],
+        filteredExperts: [],
+        searchQuery: '',
+        specializationFilter: '',
+        showChatModal: false,
+        showQuestionModal: false,
+        selectedExpert: null,
+        chatMessages: [],
+        newMessage: '',
+        questionText: '',
+        currentChatRoom: null,
+        
+        init() {
+            this.fetchExperts();
+        },
+        
+        async fetchExperts() {
+            try {
+                const response = await fetch('/api/users/');
+                if (response.ok) {
+                    const allUsers = await response.json();
+                    // Filter only experts
+                    this.experts = allUsers.filter(user => user.role === 'expert');
+                    this.filteredExperts = this.experts;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        },
+        
+        filterExperts() {
+            let filtered = this.experts;
+            
+            if (this.searchQuery.trim()) {
+                filtered = filtered.filter(expert =>
+                    expert.username.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                    (expert.profile?.specialization || '').toLowerCase().includes(this.searchQuery.toLowerCase())
+                );
+            }
+            
+            if (this.specializationFilter) {
+                filtered = filtered.filter(expert =>
+                    expert.profile?.specialization === this.specializationFilter
+                );
+            }
+            
+            this.filteredExperts = filtered;
+        },
+        
+        async startChat(expert) {
+            this.selectedExpert = expert;
+            this.showChatModal = true;
+            await this.loadChatMessages(expert.id);
+        },
+        
+        async loadChatMessages(expertId) {
+            try {
+                const response = await fetch(`/api/notifications/chat/room/${expertId}/`);
+                if (response.ok) {
+                    const data = await response.json();
+                    this.currentChatRoom = data.room_id;
+                    this.chatMessages = data.messages || [];
+                    this.$nextTick(() => {
+                        this.$refs.chatMessages.scrollTop = this.$refs.chatMessages.scrollHeight;
+                    });
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        },
+        
+        async sendMessage() {
+            if (!this.newMessage.trim()) return;
+            
+            try {
+                const response = await fetch('/api/notifications/chat/send/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': this.getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        recipient_id: this.selectedExpert.id,
+                        content: this.newMessage,
+                        room_id: this.currentChatRoom
+                    })
+                });
+                
+                if (response.ok) {
+                    this.newMessage = '';
+                    await this.loadChatMessages(this.selectedExpert.id);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        },
+        
+        askQuestion(expert) {
+            this.selectedExpert = expert;
+            this.showQuestionModal = true;
+        },
+        
+        async submitQuestion() {
+            if (!this.questionText.trim()) return;
+            
+            try {
+                const response = await fetch('/api/experts/questions/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': this.getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        content: this.questionText,
+                        expert_id: this.selectedExpert.id
+                    })
+                });
+                
+                if (response.ok) {
+                    alert('Question submitted successfully!');
+                    this.questionText = '';
+                    this.showQuestionModal = false;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        },
+        
+        getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    }
+}
+</script>
+{% endblock %}
