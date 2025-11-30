@@ -122,6 +122,22 @@
                         Expert Requests
                         <span class="ml-2 bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full" x-text="stats.pending_experts"></span>
                     </button>
+
+                    {% if user.role == 'admin' or 'produce.view_produce' in user.get_all_permissions %}
+                    <a href="{% url 'admin_produce_list' %}" 
+                       class="flex items-center px-6 py-4 font-medium text-sm text-gray-600 hover:text-green-600 hover:bg-green-50 transition-all duration-300 whitespace-nowrap">
+                        <span class="mr-2">🥬</span>
+                        Produce
+                    </a>
+                    {% endif %}
+
+                    {% if user.role == 'admin' or 'core.view_user' in user.get_all_permissions %}
+                    <a href="{% url 'admin_account_list' %}" 
+                       class="flex items-center px-6 py-4 font-medium text-sm text-gray-600 hover:text-green-600 hover:bg-green-50 transition-all duration-300 whitespace-nowrap">
+                        <span class="mr-2">🛡️</span>
+                        Accounts
+                    </a>
+                    {% endif %}
                 </nav>
             </div>
 

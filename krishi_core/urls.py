@@ -9,6 +9,7 @@ import experts.urls
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('core.urls')),
+    path('produce/', include('produce.urls')),
     
     # Template URLs
     path('farmers/', include(farmers.urls.template_urlpatterns)),
@@ -20,4 +21,6 @@ urlpatterns = [
     path('api/buyers/', include('buyers.urls')),
     path('api/experts/', include('experts.urls')),
     path('api/notifications/', include('notifications.urls')),
+    path('produce/', include('produce.urls')),
+    path('i18n/', include('django.conf.urls.i18n')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

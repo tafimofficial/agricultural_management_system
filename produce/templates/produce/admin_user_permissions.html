@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Permissions - {{ target_user.username }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <a href="{% url 'admin_account_list' %}" class="text-green-600 hover:text-green-800 mb-4 inline-block">&larr; Back to Accounts</a>
+    
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-green-800">Manage Permissions</h1>
+            <p class="text-gray-600">User: <span class="font-semibold">{{ target_user.username }}</span> ({{ target_user.email }})</p>
+        </div>
+        <button form="permissionsForm" type="submit" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition">
+            Save Changes
+        </button>
+    </div>
+
+    <form id="permissionsForm" method="post" class="bg-white rounded-xl shadow-md overflow-hidden p-6">
+        {% csrf_token %}
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for model_name, perms in permissions_by_model.items %}
+                <div class="border rounded-lg p-4 bg-gray-50">
+                    <h3 class="font-bold text-lg text-gray-800 mb-3 border-b pb-2 capitalize">{{ model_name }}</h3>
+                    <div class="space-y-2">
+                        {% for perm in perms %}
+                            <label class="flex items-start space-x-2 cursor-pointer hover:bg-gray-100 p-1 rounded">
+                                <input type="checkbox" name="permissions" value="{{ perm.id }}" 
+                                    class="mt-1 form-checkbox h-4 w-4 text-green-600 rounded border-gray-300 focus:ring-green-500"
+                                    {% if perm.id in user_permissions_ids %}checked{% endif %}>
+                                <span class="text-sm text-gray-700">{{ perm.name }}</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div class="mt-8 flex justify-end">
+            <button type="submit" class="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition font-semibold shadow-lg">
+                Save Permissions
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

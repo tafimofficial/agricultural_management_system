@@ -32,6 +32,8 @@ from .forms import CustomUserCreationForm
 from .models import ExpertRegistrationRequest, Profile
 
 def home(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard')
     return render(request, 'home.html')
 
 def register(request):
@@ -61,6 +63,11 @@ def register(request):
             else:
                 # Normal registration for farmer/buyer
                 user = form.save()
+                
+                # Assign default permissions
+                from .utils import assign_role_permissions
+                assign_role_permissions(user)
+                
                 Profile.objects.create(user=user)
                 login(request, user)
                 return redirect('dashboard')

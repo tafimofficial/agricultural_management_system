@@ -1,11 +1,14 @@
+{% load static %}
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Krishi Management System - {% block title %}Home{% endblock %}</title>
+    <title>Krishi System</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
     <style>
         [x-cloak] { display: none !important; }
     </style>
@@ -19,27 +22,50 @@
             </a>
             
             <div class="hidden md:flex space-x-6 items-center" x-data="globalNotifications()">
-                <a href="/" class="hover:text-green-200 transition">Home</a>
+                {% if not user.is_authenticated %}
+                    <a href="/" class="hover:text-green-200 transition">{% trans "Home" %}</a>
+                {% endif %}
+                
+                {% if not user.role == 'admin' %}
+                <a href="{% url 'produce_list' %}" class="hover:text-green-200 transition">{% trans "Produce" %}</a>
+                {% endif %}
+                
                 {% if user.is_authenticated %}
                     <!-- Role-based Links -->
                     {% if user.role == 'farmer' %}
                         <a href="{% url 'dashboard' %}" class="hover:text-green-200 transition relative">
-                            Farmer Dashboard
+                            {% trans "Farmer Dashboard" %}
                             <span x-show="unreadCount > 0" class="absolute -top-2 -right-3 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full" x-text="unreadCount"></span>
                         </a>
-                        <a href="/farmers/listings/" class="hover:text-green-200 transition">My Listings</a>
+                        <a href="/farmers/listings/" class="hover:text-green-200 transition">{% trans "My Listings" %}</a>
                     {% elif user.role == 'expert' %}
                         <a href="{% url 'dashboard' %}" class="hover:text-green-200 transition relative">
-                            Expert Dashboard
+                            {% trans "Expert Dashboard" %}
                             <span x-show="unreadCount > 0" class="absolute -top-2 -right-3 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full" x-text="unreadCount"></span>
                         </a>
-                        <a href="/experts/questions/" class="hover:text-green-200 transition">Questions</a>
+                        <a href="/experts/questions/" class="hover:text-green-200 transition">{% trans "Questions" %}</a>
                     {% elif user.role == 'buyer' %}
                         <a href="{% url 'dashboard' %}" class="hover:text-green-200 transition relative">
-                            Buyer Dashboard
+                            {% trans "Buyer Dashboard" %}
                             <span x-show="unreadCount > 0" class="absolute -top-2 -right-3 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full" x-text="unreadCount"></span>
                         </a>
-                        <a href="/buyers/orders/" class="hover:text-green-200 transition">My Orders</a>
+                        <a href="/buyers/orders/" class="hover:text-green-200 transition">{% trans "My Orders" %}</a>
+                    {% elif user.role == 'admin' %}
+                        <a href="{% url 'dashboard' %}" class="hover:text-green-200 transition relative">
+                            {% trans "Admin Dashboard" %}
+                            <span x-show="unreadCount > 0" class="absolute -top-2 -right-3 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full" x-text="unreadCount"></span>
+                        </a>
+                    {% else %}
+                         <!-- Custom Role or Default -->
+                        <a href="{% url 'dashboard' %}" class="hover:text-green-200 transition relative">
+                            {% trans "Dashboard" %}
+                            <span x-show="unreadCount > 0" class="absolute -top-2 -right-3 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full" x-text="unreadCount"></span>
+                        </a>
+                    {% endif %}
+
+                    <!-- Manage Produce Link for Permissioned Users -->
+                    {% if user.role == 'admin' or 'produce.add_produce' in user.get_all_permissions %}
+                        <a href="{% url 'admin_produce_list' %}" class="hover:text-green-200 transition">{% trans "Manage Produce" %}</a>
                     {% endif %}
 
                     <div class="relative" x-data="{ dropdown: false }">
@@ -48,17 +74,17 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </button>
                         <div x-show="dropdown" @click.away="dropdown = false" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-xl py-2 z-20 text-gray-800" x-cloak>
-                            <a href="{% url 'profile' %}" class="block px-4 py-2 hover:bg-green-100">Profile</a>
+                            <a href="{% url 'profile' %}" class="block px-4 py-2 hover:bg-green-100">{% trans "Profile" %}</a>
                             <div class="border-t my-1"></div>
                             <form action="{% url 'logout' %}" method="post">
                                 {% csrf_token %}
-                                <button type="submit" class="block w-full text-left px-4 py-2 hover:bg-red-100 text-red-600">Logout</button>
+                                <button type="submit" class="block w-full text-left px-4 py-2 hover:bg-red-100 text-red-600">{% trans "Logout" %}</button>
                             </form>
                         </div>
                     </div>
                 {% else %}
-                    <a href="{% url 'login' %}" class="hover:text-green-200 transition">Login</a>
-                    <a href="{% url 'register' %}" class="bg-white text-green-700 px-4 py-2 rounded-full font-semibold hover:bg-green-100 transition">Register</a>
+                    <a href="{% url 'login' %}" class="hover:text-green-200 transition">{% trans "Login" %}</a>
+                    <a href="{% url 'register' %}" class="bg-white text-green-700 px-4 py-2 rounded-full font-semibold hover:bg-green-100 transition">{% trans "Register" %}</a>
                 {% endif %}
             </div>
 
@@ -70,16 +96,23 @@
 
         <!-- Mobile Menu -->
         <div x-show="open" class="md:hidden bg-green-800 px-4 py-2 space-y-2" x-cloak>
-            <a href="/" class="block py-2 hover:bg-green-700 rounded">Home</a>
+            {% if not user.is_authenticated %}
+                <a href="/" class="block py-2 hover:bg-green-700 rounded">{% trans "Home" %}</a>
+            {% endif %}
+            <a href="{% url 'produce_list' %}" class="block py-2 hover:bg-green-700 rounded">{% trans "Produce" %}</a>
+            
             {% if user.is_authenticated %}
-                <a href="{% url 'dashboard' %}" class="block py-2 hover:bg-green-700 rounded">Dashboard</a>
+                <a href="{% url 'dashboard' %}" class="block py-2 hover:bg-green-700 rounded">{% trans "Dashboard" %}</a>
+                 {% if user.role == 'admin' or 'produce.add_produce' in user.get_all_permissions %}
+                    <a href="{% url 'admin_produce_list' %}" class="block py-2 hover:bg-green-700 rounded">{% trans "Manage Produce" %}</a>
+                {% endif %}
                 <form action="{% url 'logout' %}" method="post">
                     {% csrf_token %}
-                    <button type="submit" class="block w-full text-left py-2 hover:bg-red-700 rounded text-red-200">Logout</button>
+                    <button type="submit" class="block w-full text-left py-2 hover:bg-red-700 rounded text-red-200">{% trans "Logout" %}</button>
                 </form>
             {% else %}
-                <a href="{% url 'login' %}" class="block py-2 hover:bg-green-700 rounded">Login</a>
-                <a href="{% url 'register' %}" class="block py-2 hover:bg-green-700 rounded">Register</a>
+                <a href="{% url 'login' %}" class="block py-2 hover:bg-green-700 rounded">{% trans "Login" %}</a>
+                <a href="{% url 'register' %}" class="block py-2 hover:bg-green-700 rounded">{% trans "Register" %}</a>
             {% endif %}
         </div>
     </nav>

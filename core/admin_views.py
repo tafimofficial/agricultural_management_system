@@ -27,6 +27,10 @@ class ExpertRequestViewSet(viewsets.ReadOnlyModelViewSet):
             role='expert'
         )
         
+        # Assign default permissions
+        from .utils import assign_role_permissions
+        assign_role_permissions(user)
+        
         # Create profile
         Profile.objects.create(
             user=user,
